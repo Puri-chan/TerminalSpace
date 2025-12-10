@@ -20,6 +20,14 @@ public class PlayerController : MonoBehaviour
     public SpriteRenderer sprite;
     public AudioSource deadsound;
     public BoxCollider2D colliderplayer;
+    //PowerUp
+    float basecooldownspeed;
+    int basedamage;
+    private void Start()
+    {
+        basecooldownspeed = cooldownspeed;
+        basedamage = Damage;
+    }
     private void Update()
     {
         touchmovement();
@@ -101,6 +109,34 @@ public class PlayerController : MonoBehaviour
             }
             shooting++;
             yield return new WaitForSeconds(cooldown);
+        }
+    }
+
+    public void ApplyPowerUp(PowerUpType powerUpType, float duration)
+    {
+        switch (powerUpType)
+        {
+            case PowerUpType.RapidFire:
+                cooldownspeed = basecooldownspeed / 1.5f;
+                StartCoroutine(ResetPowerUpAfterDuration(powerUpType, duration));
+                break;
+            case PowerUpType.StrongBullets:
+                Damage = basedamage * 2;
+                StartCoroutine(ResetPowerUpAfterDuration(powerUpType, duration));
+                break;
+        }
+    }
+    IEnumerator ResetPowerUpAfterDuration(PowerUpType powerUpType, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        switch (powerUpType)
+        {
+            case PowerUpType.RapidFire:
+                cooldownspeed = basecooldownspeed;
+                break;
+            case PowerUpType.StrongBullets:
+                Damage = basedamage;
+                break;
         }
     }
 }

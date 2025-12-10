@@ -20,24 +20,35 @@ public class EnemyBehavior : MonoBehaviour
     private PlayerController playercontroller;
     private PlayerSetActive playeractive;
     int bulletswap = 0;
+    public GameObject projectileBossA, projectileBossB;
+    public Coroutine shootCoroutine;
+    public BossMachine StateMachine { get; private set; }
+    public bool alreadystarted = false;
+    public GameObject[] Powerups;
+    public float chancepowerup;
+    public bool isReset = false;
     void Start()
     {
+        if (projectileBossA != null && projectileBossB != null)
+        {
+            StateMachine = new BossMachine();
+            StateMachine.Initialize(new BossNormalState(this));
+        }
         enemycollider.enabled = false;
         IsShooting = true;
         StartCoroutine(Invicible());
         if (EnemyType == 1)
         {
-            StartCoroutine(spawnprojectileA(spawncooldown));
+            shootCoroutine = StartCoroutine(spawnprojectileA(spawncooldown));
         }
         else if (EnemyType == 2)
         {
-            StartCoroutine(spawnprojectileB(spawncooldown));
+            shootCoroutine = StartCoroutine(spawnprojectileB(spawncooldown));
         }
         else if (EnemyType == 3)
         {
-            StartCoroutine(spawnprojectileC(spawncooldown));
+            shootCoroutine = StartCoroutine(spawnprojectileC(spawncooldown));
         }
-
         damagesound = GetComponent<AudioSource>();
         score = GameObject.FindGameObjectWithTag("Scoremanage").GetComponent<ScreenStart>();
         playeractive = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerSetActive>();
@@ -67,6 +78,15 @@ public class EnemyBehavior : MonoBehaviour
             score.updatescore(Score);
             score.EnemiesRemaining();
             StartCoroutine(deleteobj());
+            float randomvalue = Random.Range(0f, 100f);
+            if (!isReset)
+            {
+                if (randomvalue <= chancepowerup)
+                {
+                    int randompowerup = Random.Range(0, Powerups.Length);
+                    Instantiate(Powerups[randompowerup], transform.position, Quaternion.identity);
+                }
+            }
         }
 
         if (playercontroller.isDead == true)
@@ -78,6 +98,10 @@ public class EnemyBehavior : MonoBehaviour
         {
             Restart();
         }
+        if (projectileBossA != null && projectileBossB != null)
+        {
+            StateMachine.Tick();
+        }
     }
 
     void Restart()
@@ -85,6 +109,8 @@ public class EnemyBehavior : MonoBehaviour
         HP -= 10000;
         damagesound.pitch = Random.Range(0.4f, 1.6f);
         damagesound.Play();
+        isReset = true;
+        StartCoroutine(DelayDrop());
     }
     //EnemyA
     IEnumerator spawnprojectileA(float cooldown)
@@ -132,6 +158,11 @@ public class EnemyBehavior : MonoBehaviour
         }
 
     }
+    //EnemyBoss
+    public void boss()
+    {
+        shootCoroutine = StartCoroutine(spawnprojectileB(spawncooldown));
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.CompareTag("PlayerProjectile"))
@@ -142,7 +173,6 @@ public class EnemyBehavior : MonoBehaviour
             StartCoroutine(effect());
         }
     }
-
     IEnumerator effect()
     {
         sprite.color = Color.red; HPDisplay.color = Color.red;
@@ -154,10 +184,15 @@ public class EnemyBehavior : MonoBehaviour
         yield return new WaitForSeconds(2f);
         Destroy(gameObject);
     }
-
     IEnumerator Invicible()
     {
         yield return new WaitForSeconds(1f);
         enemycollider.enabled = true;
+    }
+
+    IEnumerator DelayDrop()
+    {
+        yield return new WaitForSeconds(0.25f);
+        isReset = false;
     }
 }

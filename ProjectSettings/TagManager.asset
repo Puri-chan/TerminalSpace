@@ -10,6 +10,7 @@ TagManager:
   - Score
   - Scoremanage
   - Playermanage
+  - PowerUp
   layers:
   - Default
   - TransparentFX

@@ -15,7 +15,7 @@ public class ScreenStart : MonoBehaviour
     public PlayerAnimation PlayerAnimation;
     public GameObject[] enemies;
     public Transform[] wave1, wave2, wave3, wave4, wave5, wave6, wave7, wave8, wave9, wave10;
-    int enemiesremain = -1;
+    public int enemiesremain = -1;
     public int Score = 0, wave = 1, multiply;
     public TextMeshProUGUI ScoreText;
     public Animator scoretext;
@@ -35,7 +35,6 @@ public class ScreenStart : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(enemiesremain);
         //Gain More Hp and speed
         if (enemiesremain == 0)
         {
@@ -304,11 +303,13 @@ public class ScreenStart : MonoBehaviour
         isWaveStart = true;
         enemiesremain = wave10.Length;
         yield return new WaitForSeconds(1f);
-        for (int i = 0; i < wave10.Length; i++)
+        for (int i = 0; i < 2; i++)
         {
             GameObject enemy2 = Instantiate(enemies[2]);
             enemy2.transform.position = wave10[i].transform.position;
-            yield return new WaitForSeconds(1.87f);
+            yield return new WaitForSeconds(0.5f);
         }
+        GameObject enemy3 = Instantiate(enemies[3]);
+        enemy3.transform.position = wave10[2].transform.position;
     }
 }
